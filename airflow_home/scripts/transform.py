@@ -1,23 +1,22 @@
 import datetime
 
 
-def find_result_data(item: str, **kwargs):
-    ti = kwargs['ti']
-    data_in_json = ti.xcom_pull(key='ticker_data', task_ids=f'extract_{item}')
-    print(data_in_json)
-    data = dict()
+def find_result_data(item: str, **kwargs) -> None:
+    ti = kwargs['ti'] # need for xcom push and pull commands
+    ticker_info_from_api = ti.xcom_pull(key='ticker_data', task_ids=f'extract_{item}')
+    needed_data = dict()
 
-    for k, v in data_in_json.items():
+    for k, v in ticker_info_from_api.items():
         for key, value in v.items():
             for element in value['result']:
-                element_dict = dict()
+                ticker_data = dict()
                 symbol_value = element['symbol']
 
-                element_dict['symbol'] = element.get('symbol')
-                element_dict['ask'] = element.get('ask')
-                element_dict['bid'] = element.get('bid')
-                element_dict['date'] = str(datetime.datetime.now())
+                ticker_data['symbol'] = symbol_value
+                ticker_data['ask'] = element.get('ask')
+                ticker_data['bid'] = element.get('bid')
+                ticker_data['date'] = str(datetime.datetime.now())
 
-                data[symbol_value] = element_dict
+                needed_data[symbol_value] = ticker_data
 
-    ti.xcom_push(key='transformed_data', value=data)
+    ti.xcom_push(key='transformed_data', value=needed_data)
