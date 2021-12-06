@@ -1,15 +1,12 @@
 import os
 
 import psycopg2
-
 from dotenv import load_dotenv
 
 
 def data_load(item: str, **kwargs) -> None:
-    ti = kwargs['ti']
+    ti = kwargs['ti'] # need for xcom push and pull commands
     ticker_data = ti.xcom_pull(key='transformed_data', task_ids=f'transform_{item}')
-
-    print(ticker_data)
 
     load_dotenv()
 
@@ -22,11 +19,6 @@ def data_load(item: str, **kwargs) -> None:
     conn = psycopg2.connect(database=db, user=user, password=password, host=host, port=port)
 
     cursor = conn.cursor()
-
-    sql = """create table if not exists ticker_info (TICKER character varying (4) not null,\
-             ASK money not null, BID money not null, DATETIME_GATHERED timestamp not null) ;"""
-
-    cursor.execute(sql)
 
     for key, value in ticker_data.items():
         values = ', '.join([f'{float(t)}' if isinstance(t, float) else f"'{t}'" for t in value.values()])
