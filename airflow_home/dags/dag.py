@@ -7,6 +7,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
+#  Need to make scripts package visible
 sys.path.append(os.environ.get('AIRFLOW_HOME'))
 
 from scripts.extract import extract
@@ -14,14 +15,23 @@ from scripts.load import data_load
 from scripts.transform import find_result_data
 
 
-with open(os.environ.get('CONFIG_PATH')) as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
+def load_config_from_yaml(file_path: str) -> dict():
+    with open(file_path, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    return config
+
 
 default_args = {
     'depends_on_past': False
 }
 
-def create_etl_tasks(dag: DAG, ticker: str, task_before: PostgresOperator) -> None:
+
+def create_etl_tasks(
+    dag: DAG,
+    ticker: str,
+    task_before: PostgresOperator
+) -> None:
     task_1 = PythonOperator(
         task_id=f'extract_{ticker}',
         python_callable=extract,
@@ -46,7 +56,7 @@ def create_etl_tasks(dag: DAG, ticker: str, task_before: PostgresOperator) -> No
     task_before.set_downstream(task_1)
     task_1.set_downstream(task_2)
     task_2.set_downstream(task_3)
-    
+
 
 with DAG(
     'tickers_to_postgres',
@@ -59,9 +69,12 @@ with DAG(
     task = PostgresOperator(
         task_id='create_table',
         postgres_conn_id='postgres_default',
-        sql = """create table if not exists ticker_info (TICKER character varying (4) not null,\
-             ASK money not null, BID money not null, DATETIME_GATHERED timestamp not null) ;""",
+        sql="""create table if not exists ticker_info (TICKER character \
+               varying (4) not null, ASK money not null, BID money not null, \
+               DATETIME_GATHERED timestamp not null) ;""",
     )
 
-    for ticker in config['symbols']: 
+    config_data = load_config_from_yaml(os.environ.get('CONFIG_PATH'))
+
+    for ticker in config_data['symbols']:
         create_etl_tasks(dag=dag, ticker=ticker, task_before=task)
