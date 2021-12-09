@@ -2,8 +2,10 @@ import datetime
 
 
 def find_result_data(item: str, **kwargs) -> None:
-    ti = kwargs['ti'] # need for xcom push and pull commands
-    ticker_info_from_api = ti.xcom_pull(key='ticker_data', task_ids=f'extract_{item}')
+    ti = kwargs['ti']  # need for xcom push and pull commands
+    ticker_info_from_api = ti.xcom_pull(
+        key='ticker_data', task_ids=f'extract_{item}'
+    )
     needed_data = dict()
 
     for k, v in ticker_info_from_api.items():
