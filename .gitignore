@@ -157,3 +157,6 @@ airflow_home/logs/
 standalone_admin_password.txt
 airflow_home/airflow.cfg
 airflow_home/webserver_config.py
+
+# vs_code
+settings.json
