@@ -8,7 +8,7 @@ API_URL = "https://yfapi.net/v6/finance/quote"
 
 
 def extract(symbol: str, **kwargs) -> None:
-    ti = kwargs['ti'] # need for xcom push and pull commands
+    ti = kwargs['ti']  # need for xcom push and pull commands
 
     load_dotenv()
 
@@ -20,7 +20,8 @@ def extract(symbol: str, **kwargs) -> None:
 
     querystring = {"symbols": symbol}
 
-    response = requests.request("GET", API_URL, headers=headers, params=querystring)
+    response = requests.request("GET", API_URL, headers=headers,
+                                params=querystring)
 
     ticker_data[symbol] = response.json()
 
