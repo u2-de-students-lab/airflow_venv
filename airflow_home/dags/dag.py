@@ -1,12 +1,12 @@
 import os
 import sys
 from datetime import datetime, timedelta
+from typing import Dict, List
 
 import yaml
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-from typing import Dict, List
 
 #  Need to make scripts package visible
 sys.path.append(os.environ.get('AIRFLOW_HOME'))
