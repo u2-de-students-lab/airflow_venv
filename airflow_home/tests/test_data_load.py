@@ -1,6 +1,6 @@
 import os
 import unittest
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 from datetime import datetime
 
 from scripts.load import data_load
@@ -68,34 +68,38 @@ class TestDataLoad(unittest.TestCase):
             port=self.port
         )
 
-    @patch('scripts.load.psycopg2.connect')
-    def test_execute_insert_string(self, connect_mock):
+    def test_execute_insert_string(self):
         ti = Mock()
         expected_query = 'insert into ticker_info (TICKER, ASK, BID, ' \
-            + f'DATETIME_GATHERED) values ({self.data})'
+            f'DATETIME_GATHERED) values ({self.data})'
 
         ti.xcom_pull.return_value = self.income_data
 
-        mock_con = connect_mock.return_value
+        with patch('scripts.load.psycopg2.connect') as conn:
+            connection = Mock()
+            cursor = Mock()
 
-        data_load(self.ticker, ti=ti)
+            conn.return_value = connection
+            connection.cursor.return_value = cursor
 
-        mock_con.cursor.execute.return_value = expected_query
+            data_load(item=self.ticker, ti=ti)
+
+            cursor.execute.assert_called_with(expected_query)
 
     def test_connection_closed(self):
         ti = Mock()
         ti.xcom_pull.return_value = self.income_data
 
         with patch('scripts.load.psycopg2.connect') as conn:
+            conn.return_value = Mock()
             data_load(self.ticker, ti=ti)
-            expected = [call.close()]
-            conn.mock_calls = expected
+            conn.return_value.close.assert_called()
 
     def test_connection_commited(self):
         ti = Mock()
         ti.xcom_pull.return_value = self.income_data
 
         with patch('scripts.load.psycopg2.connect') as conn:
+            conn.return_value = Mock()
             data_load(self.ticker, ti=ti)
-            expected = [call.commit()]
-            conn.mock_calls = expected
+            conn.return_value.commit.assert_called()
