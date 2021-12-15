@@ -8,17 +8,15 @@ def find_result_data(item: str, **kwargs) -> None:
     )
     needed_data = dict()
 
-    for k, v in ticker_info_from_api.items():
-        for key, value in v.items():
-            for element in value['result']:
-                ticker_data = dict()
-                symbol_value = element['symbol']
+    for element in ticker_info_from_api[item]['quoteResponse']['result']:
+        ticker_data = dict()
+        symbol_value = element['symbol']
 
-                ticker_data['symbol'] = symbol_value
-                ticker_data['ask'] = element.get('ask')
-                ticker_data['bid'] = element.get('bid')
-                ticker_data['date'] = str(datetime.datetime.now())
+        ticker_data['symbol'] = symbol_value
+        ticker_data['ask'] = element.get('ask')
+        ticker_data['bid'] = element.get('bid')
+        ticker_data['date'] = str(datetime.datetime.now())
 
-                needed_data[symbol_value] = ticker_data
+        needed_data[symbol_value] = ticker_data
 
     ti.xcom_push(key='transformed_data', value=needed_data)
