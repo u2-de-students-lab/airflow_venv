@@ -37,21 +37,21 @@ def create_etl_tasks(
         python_callable=extract,
         provide_context=True,
         op_args=(ticker, ),
-        )
+    )
 
     task_2 = PythonOperator(
         task_id=f'transform_{ticker}',
         python_callable=find_result_data,
         provide_context=True,
         op_args=(ticker, ),
-        )
+    )
 
     task_3 = PythonOperator(
         task_id=f'load_{ticker}',
         python_callable=data_load,
         provide_context=True,
         op_args=(ticker, ),
-        )
+    )
 
     task_before.set_downstream(task_1)
     task_1.set_downstream(task_2)
