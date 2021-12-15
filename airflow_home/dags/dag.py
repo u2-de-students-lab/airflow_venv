@@ -6,6 +6,7 @@ import yaml
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from typing import Dict, List
 
 #  Need to make scripts package visible
 sys.path.append(os.environ.get('AIRFLOW_HOME'))
@@ -15,7 +16,7 @@ from scripts.load import data_load
 from scripts.transform import find_result_data
 
 
-def load_config_from_yaml(file_path: str) -> dict():
+def load_config_from_yaml(file_path: str) -> Dict[str, List[str]]:
     with open(file_path, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
