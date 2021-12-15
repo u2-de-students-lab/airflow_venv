@@ -16,7 +16,7 @@ def extract(symbol: str, **kwargs) -> None:
         'x-api-key': os.environ.get('API_KEY')
     }
 
-    ticker_data = dict()
+    ticker_data = {}
 
     querystring = {"symbols": symbol}
 
