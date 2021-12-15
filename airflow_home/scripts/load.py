@@ -26,13 +26,13 @@ def data_load(item: str, **kwargs) -> None:
 
     for key, value in ticker_data.items():
         values = ', '.join(
-            [f'{float(t)}'
-             if isinstance(t, float)
-             else f"'{t}'"
+            [f"'{t}'"
+             if isinstance(t, str)
+             else str(t)
              for t in value.values()]
         )
         insert = 'insert into ticker_info (TICKER, ASK, BID, ' \
-            + f'DATETIME_GATHERED) values ({values})'
+            f'DATETIME_GATHERED) values ({values})'
         cursor.execute(insert)
 
     conn.commit()
